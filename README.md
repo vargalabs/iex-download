@@ -1,9 +1,16 @@
 
-[![CI](https://github.com/vargaconsulting/iex-download/actions/workflows/ci.yml/badge.svg)](https://github.com/vargaconsulting/iex-download/actions/workflows/ci.yml)
+[![CI](https://github.com/vargalabs/iex-download/actions/workflows/ci.yml/badge.svg)](https://github.com/vargalabs/iex-download/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17188420.svg)](https://doi.org/10.5281/zenodo.17188420)
-[![GitHub release](https://img.shields.io/github/v/release/vargaconsulting/iex-download.svg)](https://github.com/vargaconsulting/iex-download/releases)
-[![Documentation](https://img.shields.io/badge/docs-stable-blue)](https://vargaconsulting.github.io/iex-download)
+[![GitHub release](https://img.shields.io/github/v/release/vargalabs/iex-download.svg)](https://github.com/vargalabs/iex-download/releases)
+[![Documentation](https://img.shields.io/badge/docs-stable-blue)](https://vargalabs.github.io/iex-download)
+
+## Build Matrix
+
+| OS / Rust | stable | beta | nightly |
+|-----------|--------|------|---------|
+| Ubuntu 22.04 | ![u22-stable][200] | ![u22-beta][201] | ![u22-nightly][202] |
+| Ubuntu 24.04 | ![u24-stable][300] | ![u24-beta][301] | ![u24-nightly][302] |
 
 # IEX High Frequency Dataset
 
@@ -11,17 +18,17 @@ The Investors Exchange (IEX) provides free access to historical datasets such as
 
 ### Why Bother?
 
-Because with this tool you can fetch over **13 TB of IEX tick data** (≈13,281 GB across 4,600 files as of 2025-09-30) in a single run as long as you agree to the [IEX Historical Data Terms of Use][101]. In a recent [blog post][201] I mentioned only ~6 TB — but that was just the TOPS feed. The full picture includes the depth feeds (**DEEP** and the recently released **DEEP+**), which are far larger. Think of trading data like an iceberg: **TOPS** is the shiny tip (best bid/ask + last trade), while **DEEP/DEEP+** contain the mass below the surface — depth, weight, and real research value. That’s where this tool helps you dive in.
+Because with this tool you can fetch over **17 TB of IEX tick data** (≈17,548 GB across 4,984 files as of 2026-03-30) in a single run as long as you agree to the [IEX Historical Data Terms of Use][101]. In a recent [blog post][111] I mentioned only ~6 TB — but that was just the TOPS feed. The full picture includes the depth feeds (**DEEP** and the recently released **DEEP+**), which are far larger. Think of trading data like an iceberg: **TOPS** is the shiny tip (best bid/ask + last trade), while **DEEP/DEEP+** contain the mass below the surface — depth, weight, and real research value. That’s where this tool helps you dive in.
 
 <table><tr><td>
-Here’s the lay of the land as of 2025 Sept 23:
+Here’s the lay of the land as of 2026 March 30:
 
-| Feed   | Files to Download | Total Size (≈ GB) |
-|--------|------------------:|------------------:|
-| **TOPS**  | 2,285 | 5,947.68 |
-| **DEEP**  | 2,115 | 5,955.02 |
-| **DEEP+** |   197 | 1,353.52 |
-| **TOTAL** | 4,597 | 13,256.22 |
+| Feed      | Files to Download | Total Size (≈ GB) |
+|-----------|------------------:|------------------:|
+| **TOPS**  |             2,414 |          7,417.95 |
+| **DEEP**  |             2,244 |          7,393.19 |
+| **DEEP+** |               326 |          2,737.07 |
+| **TOTAL** |             4,984 |         17,548.21 |
 
 
 </td><td>
@@ -54,12 +61,12 @@ Here’s the lay of the land as of 2025 Sept 23:
 - Need details? Just ask my imaginary friend, Manual. He’s got you covered. `man iex-download` of `iex-download --help`
 
 
-## Next Steps: [From PCAP to HDF5][202]
+## Next Steps: [From PCAP to HDF5][112]
 
-Downloading is just the first half of the journey. To make the IEX datasets usable for analysis and backtesting, pair this tool with [iex2h5][202].  
+Downloading is just the first half of the journey. To make the IEX datasets usable for analysis and backtesting, pair this tool with [iex2h5][112].  
 
 - `iex-download` → grabs raw gzipped PCAP files from IEX  
-- [`iex2h5`][202] → converts PCAP streams into efficient HDF5 datasets (RTS/IRTS, statistics, matrices)  
+- [`iex2h5`][112] → converts PCAP streams into efficient HDF5 datasets (RTS/IRTS, statistics, matrices)  
 
 Example workflow:
 
@@ -83,7 +90,7 @@ iex2h5 -c rts --time-interval 00:00:10 --date-range 2025-09-01:2025-09-30 -o exp
 Clone the repository:
 
 ```bash
-git clone git@github.com:vargaconsulting/iex-download.git
+git clone git@github.com:vargalabs/iex-download.git
 cd iex-download
 ````
 
@@ -99,6 +106,17 @@ make && make install
 
 [100]: https://iextrading.com/trading/market-data/
 [101]: https://www.iexexchange.io/legal/hist-data-terms
-[201]: https://steven-varga.ca/blog/longest-active-stocks-from-iex-pcap/
-[202]: https://steven-varga.ca/site/iex2h5/
-[203]: https://steven-varga.ca/iex2h5/
+[111]: https://steven-varga.ca/blog/longest-active-stocks-from-iex-pcap/
+[112]: https://steven-varga.ca/site/iex2h5/
+[113]: https://steven-varga.ca/iex2h5/
+
+
+[200]: https://vargalabs.github.io/iex-download/badges/ubuntu-22.04-rust-stable.svg
+[201]: https://vargalabs.github.io/iex-download/badges/ubuntu-22.04-rust-beta.svg
+[202]: https://vargalabs.github.io/iex-download/badges/ubuntu-22.04-rust-nightly.svg
+[203]: https://vargalabs.github.io/iex-download/badges/ubuntu-22.04-rust-1.80.0.svg
+
+[300]: https://vargalabs.github.io/iex-download/badges/ubuntu-24.04-rust-stable.svg
+[301]: https://vargalabs.github.io/iex-download/badges/ubuntu-24.04-rust-beta.svg
+[302]: https://vargalabs.github.io/iex-download/badges/ubuntu-24.04-rust-nightly.svg
+[303]: https://vargalabs.github.io/iex-download/badges/ubuntu-24.04-rust-1.80.0.svg

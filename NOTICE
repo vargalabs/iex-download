@@ -1,0 +1,32 @@
+NOTICE
+
+This software is part of the iex-download project,
+developed and maintained by Varga Labs, Toronto, ON, Canada 🇨🇦.
+
+License:
+The source code is licensed under the MIT License.
+See the LICENSE file for full terms.
+
+-------------------------------------------------------------------------------
+
+Attribution Requirement:
+If you use this software, in whole or in part, in an academic setting—
+including but not limited to theses, dissertations, coursework, or publications—
+you must provide proper attribution to the original authors.
+
+You may not misrepresent the origin or authorship of this software or
+any derivative work based on it. Failure to comply may constitute a
+violation of academic integrity policies in addition to breaching
+the terms of the license.
+
+Suggested citation:
+    Steven, Varga (2025). *iex-download: Automated Retrieval of IEX Historical Market Data (PCAP)*
+    Zenodo. https://doi.org/10.5281/zenodo.17188420
+-------------------------------------------------------------------------------
+
+Third-Party Code:
+This project includes third-party dependencies located under the `thirdparty/`
+directory. Each is governed by its own license. Refer to the corresponding
+LICENSE or NOTICE files in those subdirectories.
+
+For questions or commercial licensing inquiries, contact: info@vargaconsulting.ca

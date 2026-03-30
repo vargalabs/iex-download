@@ -8,86 +8,49 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }} / ${{ matrix.toolchain }}
+    name: ${{ matrix.os }} / rust-${{ matrix.toolchain }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        #os: [ubuntu-22.04, ubuntu-24.04, macos-13, windows-latest]
-        os: [ ubuntu-22.04 ]
-        toolchain: [stable, beta, nightly, 1.80.0] # include MSRV if you want
+        os: [ubuntu-22.04, ubuntu-24.04]
+        toolchain: [stable, beta, nightly]
         include:
           - toolchain: stable
-            rust-version: stable
+            rust_version: stable
           - toolchain: beta
-            rust-version: beta
+            rust_version: beta
           - toolchain: nightly
-            rust-version: nightly
-          - toolchain: 1.80.0
-            rust-version: 1.80.0
+            rust_version: nightly
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set badge output directory
-        id: path
-        run: |
-          if [[ "${GITHUB_REF##*/}" == "staging" ]]; then
-            echo "dir=status-staging" >> $GITHUB_OUTPUT
-          else
-            echo "dir=status" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check skip list
-        id: skip_check
-        run: |
-          skip_list=(
-            "windows-latest:beta"
-            "macos-13:nightly"
-          )
-          combo="${{ matrix.os }}:${{ matrix.toolchain }}"
-          echo "Checking combination: $combo"
-          for skip in "${skip_list[@]}"; do
-            if [[ "$combo" == "$skip" ]]; then
-              echo "SKIP_COMPILE=true" >> "$GITHUB_ENV"
-              exit 0
-            fi
-          done
-          echo "SKIP_COMPILE=false" >> "$GITHUB_ENV"
-
       - name: Install Rust
-        if: ${{ env.SKIP_COMPILE == 'false' }}
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust-version }}
-          components: clippy,rustfmt
+          toolchain: ${{ matrix.rust_version }}
 
       - name: Cache Cargo
-        if: ${{ env.SKIP_COMPILE == 'false' }}
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        if: env.SKIP_COMPILE == 'false'
         run: cargo build --release --locked
 
       - name: Test
-        if: env.SKIP_COMPILE == 'false'
-        run: cargo test --all --locked --all-features
+        run: cargo test --all-features --locked
 
       - name: Record Badge Status
         if: always()
+        shell: bash
         run: |
           mkdir -p badge-status
-          status="skipped"
-          if [[ "$SKIP_COMPILE" == "false" ]]; then
-            status="${{ job.status }}"
-          fi
-          cat <<EOF > badge-status/status-${{ matrix.os }}-${{ matrix.toolchain }}.json
+          cat <<EOF > "badge-status/status-${{ matrix.os }}-${{ matrix.toolchain }}.json"
           {
             "os": "${{ matrix.os }}",
             "toolchain": "${{ matrix.toolchain }}",
-            "status": "$status"
+            "status": "${{ job.status }}"
           }
           EOF
 
@@ -109,11 +72,12 @@ jobs:
 
       - name: Determine badge target directory
         id: badge_dir
+        shell: bash
         run: |
           if [[ "${GITHUB_REF##*/}" == "staging" ]]; then
-            echo "dir=badges-staging" >> $GITHUB_OUTPUT
+            echo "dir=badges-staging" >> "$GITHUB_OUTPUT"
           else
-            echo "dir=badges" >> $GITHUB_OUTPUT
+            echo "dir=badges" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download all badge status artifacts
@@ -123,30 +87,39 @@ jobs:
           pattern: status-*
           merge-multiple: true
 
-      - name: Generate SVG Badges
+      - name: Generate SVG badges
+        shell: bash
         run: |
-          mkdir -p ${{ steps.badge_dir.outputs.dir }}
+          mkdir -p "${{ steps.badge_dir.outputs.dir }}"
+
           for f in badge-status/*.json; do
-            [[ ! -f "$f" ]] && continue
-            os=$(jq -r .os "$f")
-            toolchain=$(jq -r .toolchain "$f")
-            status=$(jq -r .status "$f")
+            [[ -f "$f" ]] || continue
+
+            os=$(jq -r '.os' "$f")
+            toolchain=$(jq -r '.toolchain' "$f")
+            status=$(jq -r '.status' "$f")
 
             color="gray"
-            symbol="□"
             prefix="na"
+            symbol="○"
 
-            [[ "$status" == "success" ]] && { symbol="✔"; color="green"; prefix="ok"; }
-            [[ "$status" == "skipped" ]] && { symbol="○"; color="gray";  prefix="na"; }
-            [[ "$status" == "failure" ]] && { symbol="✘"; color="red";   prefix="failed"; }
+            [[ "$status" == "success"   ]] && { color="green"; prefix="ok";     symbol="✔"; }
+            [[ "$status" == "cancelled" ]] && { color="gray";  prefix="na";     symbol="○"; }
+            [[ "$status" == "failure"   ]] && { color="red";   prefix="failed"; symbol="✘"; }
 
-            label="${os}-${toolchain}"
-            badge="${{ steps.badge_dir.outputs.dir }}/${label}.svg"
-            curl -s "https://img.shields.io/badge/${label}-${symbol}-${color}.svg" -o "$badge"
+            badge_name="${os}-rust-${toolchain}.svg"
+            badge="${{ steps.badge_dir.outputs.dir }}/${badge_name}"
+
+            prefix_enc=$(printf '%s' "$prefix" | jq -sRr @uri)
+            symbol_enc=$(printf '%s' "$symbol" | jq -sRr @uri)
+
+            curl -fsSL \
+              "https://img.shields.io/static/v1?label=${prefix_enc}&message=${symbol_enc}&color=${color}" \
+              -o "$badge"
           done
 
       - name: Upload badge folder to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./${{ steps.badge_dir.outputs.dir }}
